@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#141026">
+<title>이룸 구구단 좀비런 🧟🔫</title>
+<style>
+  :root{
+    --bg1:#0f0b1f; --bg2:#1b1636; --ink:#3a2f5a;
+    --cyan:#31d4ff; --cyan-d:#12a8d6;
+    --green:#3ad17a; --green-d:#22b062; --green-l:#d7ffe8;
+    --purple:#8a6bff; --purple-d:#6a45f0; --purple-l:#efe8ff;
+    --red:#ff6b6b; --gold:#ffd150;
+    --gray:#e6e2f0; --gray-d:#a99fc4;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Segoe UI','Malgun Gothic',system-ui,sans-serif;
+    background:radial-gradient(120% 80% at 50% 0%, #2a1f52 0%, var(--bg2) 45%, var(--bg1) 100%);
+    color:var(--ink); min-height:100dvh; display:flex; justify-content:center;
+    -webkit-user-select:none; user-select:none; overscroll-behavior:none; touch-action:none;
+    -webkit-text-size-adjust:100%;
+  }
+  #app{position:relative; width:100%; max-width:500px; min-height:100dvh; display:flex; flex-direction:column;
+    padding:calc(12px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));}
+
+  .btn{border:none; border-radius:20px; font-family:inherit; font-weight:900; font-size:19px;
+       padding:16px; width:100%; cursor:pointer; transition:transform .06s, box-shadow .06s; color:#fff;}
+  .btn:active{transform:translateY(4px);}
+  .btn-cyan{background:linear-gradient(180deg,#4fddff,#20b6e6); box-shadow:0 6px 0 var(--cyan-d);}
+  .btn-cyan:active{box-shadow:0 2px 0 var(--cyan-d);}
+  .btn-green{background:var(--green); box-shadow:0 6px 0 var(--green-d);}
+  .btn-green:active{box-shadow:0 2px 0 var(--green-d);}
+  .btn-ghost{background:rgba(255,255,255,.14); box-shadow:0 4px 0 rgba(0,0,0,.25);}
+  .btn-ghost:active{box-shadow:0 1px 0 rgba(0,0,0,.25);}
+
+  .screen{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center;}
+  .hide{display:none !important;}
+  .zzz{font-size:clamp(50px,15vw,72px); line-height:1; animation:bob 2.2s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12px) rotate(4deg)}}
+
+  /* 홈 */
+  #home h1{font-size:29px; font-weight:900; color:#fff; margin:4px 0 2px; text-shadow:0 2px 8px #0007;}
+  #home .tag{color:#d9d0ff; font-size:14px; font-weight:700; line-height:1.5; margin-bottom:6px;}
+  .chips{display:flex; gap:10px; margin:4px 0 10px; flex-wrap:wrap; justify-content:center;}
+  .chip{background:rgba(255,255,255,.14); border:2px solid var(--gold); border-radius:16px; padding:7px 14px;
+        font-weight:900; font-size:14px; color:#fff;}
+  .chip.fire{border-color:#ff9f6b;}
+  #danGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:11px; width:100%; margin-top:6px;}
+  .danCard{aspect-ratio:1/1; border-radius:20px; background:#fff; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:1px; cursor:pointer; box-shadow:0 6px 0 #cfc6e6; transition:.06s;}
+  .danCard:active{transform:translateY(4px); box-shadow:0 2px 0 #cfc6e6;}
+  .danCard .num{font-size:32px; font-weight:900; color:var(--purple-d); line-height:1;}
+  .danCard .sub{font-size:12px; font-weight:800; color:var(--gray-d);}
+  .danCard .stars{font-size:12px; letter-spacing:1px; height:15px;}
+  .danCard.locked{background:#e9e5f3; box-shadow:0 6px 0 #d7d1e8; cursor:default;}
+  .danCard.locked .num{color:#c3bad9;} .danCard.locked .lock{font-size:24px;}
+  .danCard.cleared{background:linear-gradient(180deg,#fffdf5,#fff2d0);}
+
+  /* 인트로 */
+  #intro{justify-content:center; gap:14px;}
+  #intro .big{font-size:29px; font-weight:900; color:#fff; text-shadow:0 2px 8px #0007;}
+  #intro .hop{color:#ffe08a; font-size:16px; font-weight:800;}
+  #jump{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:360px; min-height:110px; align-content:center;}
+  .jchip{background:#fff; border-radius:14px; padding:8px 4px; min-width:50px; box-shadow:0 4px 0 #cbb8ff; animation:pop .3s ease;}
+  .jchip .plus{font-size:11px; font-weight:800; color:var(--purple); display:block; height:13px;}
+  .jchip .v{font-size:21px; font-weight:900; color:var(--ink);}
+  #intro .rule{color:#cfc6ee; font-size:13px; line-height:1.6; max-width:330px;}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+
+  /* 플레이 */
+  #playWrap{position:relative; flex:1; display:none; border-radius:22px; overflow:hidden;
+    box-shadow:0 10px 30px #0006; background:#0c0a18;}
+  #game{display:block; width:100%; height:100%; touch-action:none;}
+  #quitBtn{position:absolute; top:8px; left:8px; z-index:3; width:38px; height:38px; border-radius:12px;
+    background:rgba(0,0,0,.4); color:#fff; border:none; font-size:20px; font-weight:800; cursor:pointer;}
+  #hintTip{position:absolute; left:0; right:0; bottom:10px; z-index:3; text-align:center; color:#bfe9ff;
+    font-size:13px; font-weight:800; text-shadow:0 1px 3px #000a; pointer-events:none;}
+
+  /* 결과 */
+  #end{justify-content:center; gap:14px;}
+  #endEmoji{font-size:80px;} #endTitle{font-size:25px; font-weight:900; color:#fff; text-shadow:0 2px 8px #0007;}
+  #endCheer{color:#e5dcff; font-size:15px; font-weight:700; line-height:1.5;}
+  .endCards{display:flex; gap:10px; width:100%;}
+  .endCard{flex:1; background:rgba(255,255,255,.12); border-radius:16px; padding:13px 4px;}
+  .endCard .l{font-size:11px; color:#cfc6ee; font-weight:800;} .endCard .v{font-size:22px; font-weight:900; color:#fff; margin-top:3px;}
+  .pop{animation:pop .4s ease;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 홈 -->
+  <div id="home" class="screen">
+    <div class="zzz">🧟</div>
+    <h1>구구단 좀비런</h1>
+    <div class="tag">정답 문으로 통과하면 총이 세져!<br>1단부터 순서대로 좀비를 뚫어라 🔫</div>
+    <div class="chips">
+      <div class="chip">🏆 최고 <span id="best">0</span>단</div>
+      <div class="chip fire">🔥 <span id="streak">0</span>일 연속</div>
+    </div>
+    <div id="danGrid"></div>
+  </div>
+
+  <!-- 인트로 -->
+  <div id="intro" class="screen hide">
+    <div class="big" id="introTitle"></div>
+    <div class="hop" id="introHop"></div>
+    <div id="jump"></div>
+    <div class="rule">문 2개 중 <b style="color:#8affd6">정답</b>으로 달리면 총 Lv↑ · 틀리면 Lv↓<br>총이 세야 좀비를 막아! 손가락으로 좌우로 움직여 🕹️</div>
+    <button class="btn btn-cyan" style="max-width:240px" id="introGo" onclick="beginStage()">출발! 🔫</button>
+  </div>
+
+  <!-- 플레이 -->
+  <div id="playWrap">
+    <canvas id="game"></canvas>
+    <button id="quitBtn" onclick="goHome()">✕</button>
+    <div id="hintTip">손가락으로 좌우로 움직여!</div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="end" class="screen hide">
+    <div id="endEmoji">🎉</div>
+    <div id="endTitle"></div>
+    <div id="endCheer"></div>
+    <div class="endCards">
+      <div class="endCard"><div class="l">처치 좀비</div><div class="v" id="endKill">0</div></div>
+      <div class="endCard"><div class="l">최고 총Lv</div><div class="v" id="endGun">1</div></div>
+      <div class="endCard"><div class="l">받은 별</div><div class="v" id="endStar">–</div></div>
+    </div>
+    <button class="btn btn-green" style="max-width:280px" id="endNext"></button>
+    <button class="btn btn-ghost" style="max-width:280px" onclick="goHome()">단 고르기 🗺️</button>
+  </div>
+
+</div>
+
+<script>
+/* ================= 저장/공통 ================= */
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const getUnlocked=()=>Math.min(9,Math.max(1,+(localStorage.getItem('zz_unlocked')||1)));
+const getStar=d=>+(localStorage.getItem('zz_star_'+d)||0);
+
+const TOTAL_GATES=9, MAXHEART=5, MAXLVL=8;
+
+/* 난이도 스케일 (단이 오를수록 좀비 크고·많고·강하고·빠름) */
+const zSize   = d=>30+(d-1)*2.4;               // 크기 ↑
+const zHp     = d=>1+Math.floor((d-1)/2);      // 체력 ↑ (1→5)
+const zSpeed  = d=>118+d*15;                   // 낙하 속도 ↑
+const zEvery  = d=>Math.max(0.42,1.15-d*0.082);// 스폰 간격 ↓ (더 많이)
+const gateSpeed=d=>150+d*9;
+
+/* 총 레벨 효과 */
+const fireEvery = l=>Math.max(0.13,0.56-l*0.052);
+const shots     = l=>l>=7?3:(l>=4?2:1);
+const dmg       = l=>1+Math.floor((l-1)/2);    // Lv1:1 Lv3:2 Lv5:3 Lv7:4
+
+const OKG=["정답! 🔫Lv↑","좋았어! 총 강화 ⚡","슉! 업그레이드","명중 감각 ✨"];
+const NOG=["앗 Lv↓","괜찮아 다시!","다음엔 맞아 💪"];
+
+/* ================= 상태 ================= */
+let state='home', curDan=1, qIndex=0;
+let hearts=MAXHEART, gunLevel=1, maxGun=1, killCount=0, wrongGates=0;
+let bullets=[], zombies=[], floaters=[], gate=null, pendingClear=false, clearT=0;
+let fireT=0, zombieT=0, gateCoolT=0, flash=null;
+let W=0,H=0,dpr=1, ctx=null, canvas=null;
+let player={cx:0,targetX:0,y:0,w:40};
+let lastT=0, running=false;
+
+/* ================= 홈 ================= */
+function loadHome(){
+  state='home'; running=false;
+  $('home').classList.remove('hide'); $('intro').classList.add('hide');
+  $('end').classList.add('hide'); $('playWrap').style.display='none';
+  $('best').textContent=getUnlocked();
+  $('streak').textContent=+(localStorage.getItem('zz_streak')||0);
+  const un=getUnlocked(), g=$('danGrid'); g.innerHTML='';
+  for(let d=1;d<=9;d++){
+    const c=document.createElement('div'); const lock=d>un, st=getStar(d);
+    c.className='danCard'+(lock?' locked':(st?' cleared':''));
+    if(lock){ c.innerHTML=`<div class="lock">🔒</div><div class="sub">${d}단</div>`; }
+    else{ c.innerHTML=`<div class="num">${d}</div><div class="sub">${d}단</div>
+          <div class="stars">${'⭐'.repeat(st)}${'·'.repeat(3-st)}</div>`; c.onclick=()=>showIntro(d); }
+    g.appendChild(c);
+  }
+}
+function goHome(){ running=false; loadHome(); }
+
+/* ================= 인트로 ================= */
+function showIntro(d){
+  curDan=d; state='intro'; running=false;
+  $('home').classList.add('hide'); $('end').classList.add('hide'); $('playWrap').style.display='none';
+  $('intro').classList.remove('hide');
+  $('introTitle').textContent=`${d}단 좀비런 🧟`;
+  $('introHop').textContent=`${d}씩 뛰어세기!`;
+  const jump=$('jump'); jump.innerHTML=''; $('introGo').style.visibility='hidden';
+  let n=1;
+  (function step(){
+    const chip=document.createElement('div'); chip.className='jchip';
+    chip.innerHTML=`<span class="plus">${n===1?'&nbsp;':'+'+d}</span><span class="v">${d*n}</span>`;
+    jump.appendChild(chip); blip(420+n*55,.07); n++;
+    if(n<=9) setTimeout(step,230); else setTimeout(()=>$('introGo').style.visibility='visible',240);
+  })();
+}
+
+/* ================= 캔버스 ================= */
+function resize(){
+  if(!canvas) return;
+  const r=$('playWrap').getBoundingClientRect();
+  dpr=Math.min(2,window.devicePixelRatio||1);
+  W=Math.round(r.width); H=Math.round(r.height);
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  player.y=H-64; player.cx=clamp(player.cx||W/2,30,W-30); player.targetX=clamp(player.targetX||W/2,30,W-30);
+}
+
+/* ================= 스테이지 시작 ================= */
+function beginStage(){
+  state='play';
+  $('intro').classList.add('hide'); $('home').classList.add('hide'); $('end').classList.add('hide');
+  $('playWrap').style.display='block';
+  canvas=$('game'); ctx=canvas.getContext('2d');
+  resize();
+  qIndex=0; hearts=MAXHEART; gunLevel=1; maxGun=1; killCount=0; wrongGates=0;
+  bullets=[]; zombies=[]; floaters=[]; gate=null; pendingClear=false; clearT=0;
+  fireT=0; zombieT=0.5; gateCoolT=1.1; flash=null;
+  player.cx=W/2; player.targetX=W/2;
+  lastT=0; running=true; requestAnimationFrame(loop);
+}
+
+/* ================= 게이트 ================= */
+function spawnGate(){
+  const mul=qIndex+1, ans=curDan*mul;
+  let wrong; const cand=[ans+curDan,ans-curDan,ans+1,ans-1,ans+2].filter(v=>v>0&&v!==ans);
+  wrong=pick(cand)||ans+1;
+  const correctSide=Math.random()<.5?'L':'R';
+  gate={y:-58,h:54,mul,ans,
+    L:correctSide==='L'?ans:wrong, R:correctSide==='R'?ans:wrong,
+    correctSide, resolved:false};
+}
+function resolveGate(){
+  gate.resolved=true;
+  const side=player.cx<W/2?'L':'R';
+  const ok=side===gate.correctSide;
+  if(ok){ gunLevel=Math.min(MAXLVL,gunLevel+1); maxGun=Math.max(maxGun,gunLevel);
+    addFloat(`${curDan}×${gate.mul}=${gate.ans} ✓`,'#8affd6'); addFloat(pick(OKG),'#8affd6',26); blip(880,.12); }
+  else{ gunLevel=Math.max(1,gunLevel-1); wrongGates++;
+    addFloat(`정답은 ${gate.ans}!`,'#ff9f9f'); addFloat(pick(NOG),'#ff9f9f',26); blip(180,.2); flash={c:'255,80,80',a:.5}; }
+  qIndex++; gateCoolT=1.7;
+  if(qIndex>=TOTAL_GATES){ pendingClear=true; }
+}
+
+/* ================= 발사 ================= */
+function shoot(){
+  const n=shots(gunLevel), d=dmg(gunLevel);
+  const tipY=player.y-(18+gunLevel*4);
+  for(let i=0;i<n;i++){
+    const off=(i-(n-1)/2)*11;
+    bullets.push({x:player.cx+off,y:tipY,vy:-640,dmg:d,r:3+gunLevel*0.35});
+  }
+  blip(1150+gunLevel*40,.03);
+}
+
+/* ================= 루프 ================= */
+function loop(t){
+  if(!running) return;
+  if(!lastT) lastT=t;
+  let dt=(t-lastT)/1000; lastT=t; if(dt>0.05) dt=0.05;
+  if(state==='play') update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  // 이동
+  player.cx += (player.targetX-player.cx)*Math.min(1,dt*14);
+  player.cx=clamp(player.cx,26,W-26);
+  // 발사
+  fireT-=dt; if(fireT<=0){ shoot(); fireT=fireEvery(gunLevel); }
+  // 총알
+  for(const b of bullets) b.y+=b.vy*dt;
+  bullets=bullets.filter(b=>b.y>-20);
+  // 좀비 스폰
+  if(!pendingClear){ zombieT-=dt; if(zombieT<=0){ spawnZombie(); zombieT=zEvery(curDan)*(0.75+Math.random()*0.5); } }
+  // 좀비 이동 — 플레이어를 향해 달려듦 (좌우 추적 + 아래 절반에서 러시)
+  const sp=zSpeed(curDan);
+  const chase=48+curDan*10;              // 단 높을수록 더 집요하게 쫓아옴
+  for(const z of zombies){
+    const lunge = z.y>H*0.5 ? 1.35 : 1;  // 가까워지면 확 달려듦
+    z.y += sp*lunge*dt;
+    const dx=player.cx - z.x, step=chase*(z.y>H*0.4?1.5:1)*dt;
+    z.x += Math.abs(dx)<=step ? dx : Math.sign(dx)*step;
+  }
+  // 총알-좀비 충돌
+  for(const b of bullets){
+    for(const z of zombies){
+      if(z.dead) continue;
+      if(Math.abs(b.x-z.x)<z.size*0.5 && Math.abs(b.y-z.y)<z.size*0.5){
+        z.hp-=b.dmg; b.y=-999;
+        if(z.hp<=0){ z.dead=true; killCount++; addFloat('💥',pick(['#ffd150','#8affd6']),18,z.x,z.y); }
+        break;
+      }
+    }
+  }
+  bullets=bullets.filter(b=>b.y>-20);
+  // 좀비가 바닥(플레이어) 도달 → 하트 감소
+  for(const z of zombies){
+    if(!z.dead && z.y>player.y-6){ z.dead=true; hearts--; flash={c:'255,60,60',a:.6};
+      addFloat('-❤️','#ff8080',24,z.x,player.y-30); blip(140,.25); }
+  }
+  zombies=zombies.filter(z=>!z.dead && z.y<H+40);
+  // 게이트
+  if(!gate && !pendingClear && qIndex<TOTAL_GATES){ gateCoolT-=dt; if(gateCoolT<=0) spawnGate(); }
+  if(gate){
+    gate.y+=gateSpeed(curDan)*dt;
+    if(!gate.resolved && gate.y+gate.h>=player.y) resolveGate();
+    if(gate.y>H+30) gate=null;
+  }
+  // 플로터
+  for(const f of floaters){ f.y-=26*dt; f.life-=dt; }
+  floaters=floaters.filter(f=>f.life>0);
+  // 플래시 페이드
+  if(flash){ flash.a-=dt*1.4; if(flash.a<=0) flash=null; }
+  // 종료 판정
+  if(hearts<=0){ return endGame(false); }
+  if(pendingClear && !gate){ clearT+=dt; if(clearT>0.8) return endGame(true); }
+}
+
+function spawnZombie(){
+  const s=zSize(curDan);
+  zombies.push({x:26+Math.random()*(W-52), y:-s, size:s, hp:zHp(curDan), maxhp:zHp(curDan), dead:false});
+}
+function addFloat(txt,color,size,x,y){ floaters.push({txt,color,size:size||20,x:x!=null?x:W/2,y:y!=null?y:H*0.42,life:1.0}); }
+
+/* ================= 렌더 ================= */
+function render(){
+  if(!ctx) return;
+  ctx.clearRect(0,0,W,H);
+  // 배경 길
+  ctx.fillStyle='#0c0a18'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=2;
+  const off=(lastT*0.06)%40;
+  ctx.beginPath(); for(let y=-40+off;y<H;y+=40){ ctx.moveTo(W/2,y); ctx.lineTo(W/2,y+22);} ctx.stroke();
+
+  // 게이트
+  if(gate) drawGate(gate);
+  // 좀비
+  for(const z of zombies) drawZombie(z);
+  // 총알
+  for(const b of bullets){
+    ctx.fillStyle='#8affd6'; ctx.shadowColor='#31d4ff'; ctx.shadowBlur=8;
+    roundRect(b.x-b.r,b.y-b.r*2,b.r*2,b.r*4,b.r); ctx.fill(); ctx.shadowBlur=0;
+  }
+  // 플레이어
+  drawPlayer();
+  // 플로터
+  for(const f of floaters){ ctx.globalAlpha=clamp(f.life,0,1); ctx.fillStyle=f.color;
+    ctx.font=`900 ${f.size}px 'Segoe UI',sans-serif`; ctx.textAlign='center';
+    ctx.fillText(f.txt,f.x,f.y); ctx.globalAlpha=1; }
+  // HUD
+  drawHUD();
+  // 플래시
+  if(flash){ ctx.fillStyle=`rgba(${flash.c},${clamp(flash.a,0,1)})`; ctx.fillRect(0,0,W,H); }
+}
+
+function drawGate(g){
+  const y=g.y, h=g.h, mid=W/2;
+  const okL=g.correctSide==='L';
+  // 왼/오 반투명 색
+  ctx.fillStyle=okL?'rgba(58,209,122,.28)':'rgba(138,107,255,.26)';
+  ctx.fillRect(0,y,mid,h);
+  ctx.fillStyle=okL?'rgba(138,107,255,.26)':'rgba(58,209,122,.28)';
+  ctx.fillRect(mid,y,W-mid,h);
+  // 경계선
+  ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(mid-1.5,y,3,h);
+  // 숫자
+  ctx.textAlign='center'; ctx.font="900 30px 'Segoe UI',sans-serif";
+  ctx.fillStyle='#fff'; ctx.fillText(g.L, mid/2, y+h/2+10);
+  ctx.fillText(g.R, mid+mid/2, y+h/2+10);
+}
+
+function drawZombie(z){
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font=`${z.size}px "Segoe UI Emoji","Apple Color Emoji",serif`;
+  ctx.fillText('🧟', z.x, z.y);
+  ctx.textBaseline='alphabetic';
+  if(z.maxhp>1){ // 체력바
+    const bw=z.size*0.8, bh=4, bx=z.x-bw/2, by=z.y-z.size*0.62;
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(bx,by,bw,bh);
+    ctx.fillStyle='#ff5b5b'; ctx.fillRect(bx,by,bw*clamp(z.hp/z.maxhp,0,1),bh);
+  }
+}
+
+function drawPlayer(){
+  const x=player.cx, y=player.y;
+  const hue=190-gunLevel*12; // 레벨 오를수록 색 변화
+  // 몸
+  ctx.fillStyle=`hsl(${hue},80%,58%)`; roundRect(x-16,y-14,32,30,10); ctx.fill();
+  // 머리
+  ctx.fillStyle='#ffe0c2'; ctx.beginPath(); ctx.arc(x,y-20,10,0,7); ctx.fill();
+  // 총구(레벨↑ 길고 두껍게)
+  const len=18+gunLevel*4, wd=6+gunLevel*0.9;
+  ctx.fillStyle=`hsl(${hue},70%,42%)`; ctx.fillRect(x-wd/2,y-14-len,wd,len);
+  ctx.fillStyle='#fff'; ctx.font="900 12px 'Segoe UI',sans-serif"; ctx.textAlign='center';
+  ctx.fillText('Lv'+gunLevel, x, y+30);
+}
+
+function drawHUD(){
+  // 상단 배너
+  ctx.fillStyle='rgba(10,8,24,.72)'; ctx.fillRect(0,0,W,80);
+  ctx.textAlign='center';
+  // 문제
+  ctx.fillStyle='#fff'; ctx.font="900 30px 'Segoe UI',sans-serif";
+  const mul=Math.min(qIndex+1,TOTAL_GATES);
+  ctx.fillText(`${curDan} × ${mul} = ?`, W/2, 38);
+  // 덧셈 힌트
+  ctx.fillStyle='#8fe6ff'; ctx.font="800 14px 'Segoe UI',sans-serif";
+  ctx.fillText(`${Array(mul).fill(curDan).join('+')} = ?`, W/2, 62);
+  // 좌: 단
+  ctx.textAlign='left'; ctx.fillStyle='#ffd150'; ctx.font="900 15px 'Segoe UI',sans-serif";
+  ctx.fillText(`${curDan}단`, 52, 26);
+  // 진행
+  ctx.fillStyle='#cfc6ee'; ctx.font="800 13px 'Segoe UI',sans-serif";
+  ctx.fillText(`문 ${Math.min(qIndex+1,TOTAL_GATES)}/${TOTAL_GATES}`, 52, 46);
+  // 우: 하트 + 총Lv
+  ctx.textAlign='right'; ctx.font="16px 'Segoe UI Emoji',serif";
+  ctx.fillText('❤️'.repeat(Math.max(0,hearts))+'🤍'.repeat(MAXHEART-Math.max(0,hearts)), W-10, 28);
+  ctx.fillStyle='#8affd6'; ctx.font="900 14px 'Segoe UI',sans-serif";
+  ctx.fillText('🔫 Lv'+gunLevel, W-12, 50);
+}
+
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+/* ================= 결과 ================= */
+function endGame(win){
+  running=false; state='end';
+  $('playWrap').style.display='none'; $('end').classList.remove('hide');
+  bumpStreak();
+  let emoji,title,cheer,btn,star=0;
+  if(win){
+    star = (wrongGates===0 && hearts>=4)?3 : (hearts>=3?2:1);
+    if(getStar(curDan)<star) localStorage.setItem('zz_star_'+curDan,star);
+    if(curDan+1>getUnlocked() && curDan<9) localStorage.setItem('zz_unlocked',curDan+1);
+    emoji = star===3?'🏆':'🎉';
+    title = `${curDan}단 클리어! ${'⭐'.repeat(star)}`;
+    cheer = wrongGates===0? '문을 하나도 안 틀렸어! 총 완전 만렙 🔫✨'
+                          : '좀비를 다 뚫었어! 다음 단은 더 세진다 💪';
+    btn = curDan<9? `${curDan+1}단으로 계속 🧟` : '9단까지 정복! 🏆';
+  }else{
+    emoji='🧟'; title='좀비에게 잡혔다!';
+    cheer='총이 약해서 밀렸어. 정답 문으로 달리면 총이 세져!<br>한 번만 더 해보자 🔫';
+    btn=`${curDan}단 다시 도전 🔁`;
+  }
+  $('endEmoji').textContent=emoji; $('endEmoji').className='pop';
+  $('endTitle').textContent=title; $('endCheer').innerHTML=cheer;
+  $('endKill').textContent=killCount; $('endGun').textContent='Lv'+maxGun;
+  $('endStar').textContent = star? '⭐'.repeat(star) : '–';
+  const nb=$('endNext'); nb.textContent=btn;
+  nb.onclick=()=>{ if(win && curDan<9) showIntro(curDan+1); else if(win) loadHome(); else showIntro(curDan); };
+}
+
+/* ================= 연속일 ================= */
+function bumpStreak(){
+  const today=new Date().toDateString(), last=localStorage.getItem('zz_lastday');
+  let s=+(localStorage.getItem('zz_streak')||0);
+  if(last!==today){ const y=new Date(Date.now()-86400000).toDateString();
+    s=(last===y)?s+1:1; localStorage.setItem('zz_streak',s); localStorage.setItem('zz_lastday',today); }
+}
+
+/* ================= 입력 ================= */
+function setTarget(clientX){
+  if(!canvas) return; const r=canvas.getBoundingClientRect();
+  player.targetX=clamp(clientX-r.left,26,W-26);
+}
+let pointerDown=false;
+function onDown(e){ pointerDown=true; const x=(e.touches?e.touches[0].clientX:e.clientX); setTarget(x); }
+function onMove(e){ if(!pointerDown && e.type!=='mousemove') return; const x=(e.touches?e.touches[0].clientX:e.clientX); if(pointerDown||e.buttons) setTarget(x); }
+function onUp(){ pointerDown=false; }
+window.addEventListener('pointerdown',onDown,{passive:true});
+window.addEventListener('pointermove',onMove,{passive:true});
+window.addEventListener('pointerup',onUp,{passive:true});
+window.addEventListener('keydown',e=>{
+  if(state!=='play') return;
+  if(e.key==='ArrowLeft') player.targetX=clamp(player.targetX-38,26,W-26);
+  if(e.key==='ArrowRight') player.targetX=clamp(player.targetX+38,26,W-26);
+});
+window.addEventListener('resize',()=>{ if(state==='play') resize(); });
+
+/* ================= 효과음 ================= */
+function blip(freq,dur){
+  try{ const C=window.AudioContext||window.webkitAudioContext; if(!C) return;
+    blip.ctx=blip.ctx||new C(); const o=blip.ctx.createOscillator(),g=blip.ctx.createGain();
+    o.type='triangle'; o.frequency.value=freq; o.connect(g); g.connect(blip.ctx.destination);
+    g.gain.value=.045; g.gain.exponentialRampToValueAtTime(.0001,blip.ctx.currentTime+dur);
+    o.start(); o.stop(blip.ctx.currentTime+dur);
+  }catch(e){}
+}
+
+loadHome();
+</script>
+</body>
+</html>
