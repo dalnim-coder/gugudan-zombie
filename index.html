@@ -284,7 +284,7 @@ function update(dt){
   // 발사
   fireT-=dt; if(fireT<=0){ shoot(); fireT=fireEvery(gunLevel); }
   // 총알
-  for(const b of bullets) b.y+=b.vy*dt;
+  for(const b of bullets){ b.py=b.y; b.y+=b.vy*dt; }
   bullets=bullets.filter(b=>b.y>-20);
   // 좀비 스폰
   if(!pendingClear){ zombieT-=dt; if(zombieT<=0){ spawnZombie(); zombieT=zEvery(curDan)*(0.75+Math.random()*0.5); } }
@@ -301,7 +301,9 @@ function update(dt){
   for(const b of bullets){
     for(const z of zombies){
       if(z.dead) continue;
-      if(Math.abs(b.x-z.x)<z.size*0.5 && Math.abs(b.y-z.y)<z.size*0.5){
+      // 스윕 판정: 이번 프레임에 총알이 지나간 구간 전체로 검사 (프레임 끊겨도 안 뚫림) + 판정 폭 넓힘
+      const hw=z.size*0.65+b.r, hh=z.size*0.6, top=b.y, bot=(b.py!=null?b.py:b.y)+sp*1.35*dt;
+      if(Math.abs(b.x-z.x)<hw && z.y+hh>=top && z.y-hh<=bot){
         z.hp-=b.dmg; b.y=-999;
         if(z.hp<=0){ z.dead=true; killCount++; addFloat('💥',pick(['#ffd150','#8affd6']),18,z.x,z.y); }
         break;
