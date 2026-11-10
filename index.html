@@ -150,15 +150,16 @@ const TOTAL_GATES=9, MAXHEART=5, MAXLVL=8;
 
 /* 난이도 스케일 (단이 오를수록 좀비 크고·많고·강하고·빠름) */
 const zSize   = d=>30+(d-1)*2.4;               // 크기 ↑
-const zHp     = d=>1+Math.floor((d-1)/2);      // 체력 ↑ (1→5)
-const zSpeed  = d=>118+d*15;                   // 낙하 속도 ↑
-const zEvery  = d=>Math.max(0.42,1.15-d*0.082);// 스폰 간격 ↓ (더 많이)
+const zHp     = d=>1+Math.floor((d-1)/3);      // 체력 ↑ (1→3) 완만하게
+const zSpeed  = d=>118+d*11;                   // 낙하 속도 ↑ (완만)
+const zEvery  = d=>Math.max(0.62,1.15-d*0.06); // 스폰 간격 ↓ (완만)
+const startLv = d=>1+Math.floor((d-1)/3);      // 단 높을수록 총 Lv 높게 시작 (1~3단:1, 4~6단:2, 7~9단:3)
 const gateSpeed=d=>150+d*9;
 
 /* 총 레벨 효과 */
 const fireEvery = l=>Math.max(0.13,0.56-l*0.052);
 const shots     = l=>l>=7?3:(l>=4?2:1);
-const dmg       = l=>1+Math.floor((l-1)/2);    // Lv1:1 Lv3:2 Lv5:3 Lv7:4
+const dmg       = l=>1+Math.floor(l/2);        // Lv1:1 Lv2:2 Lv4:3 Lv6:4 Lv8:5
 
 const OKG=["정답! 🔫Lv↑","좋았어! 총 강화 ⚡","슉! 업그레이드","명중 감각 ✨"];
 const NOG=["앗 Lv↓","괜찮아 다시!","다음엔 맞아 💪"];
@@ -226,7 +227,7 @@ function beginStage(){
   $('playWrap').style.display='block';
   canvas=$('game'); ctx=canvas.getContext('2d');
   resize();
-  qIndex=0; hearts=MAXHEART; gunLevel=1; maxGun=1; killCount=0; wrongGates=0;
+  qIndex=0; hearts=MAXHEART; gunLevel=startLv(curDan); maxGun=gunLevel; killCount=0; wrongGates=0;
   bullets=[]; zombies=[]; floaters=[]; gate=null; pendingClear=false; clearT=0;
   fireT=0; zombieT=0.5; gateCoolT=1.1; flash=null;
   player.cx=W/2; player.targetX=W/2;
