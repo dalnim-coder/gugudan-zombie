@@ -152,14 +152,14 @@ const TOTAL_GATES=9, MAXHEART=5, MAXLVL=8;
 const zSize   = d=>30+(d-1)*2.4;               // 크기 ↑
 const zHp     = d=>1+Math.floor((d-1)/4);      // 체력 (1~4단:1, 5~8단:2, 9단:3)
 const zSpeed  = d=>118+d*11;                   // 낙하 속도 ↑ (완만)
-const zEvery  = d=>Math.max(0.62,1.15-d*0.06); // 스폰 간격 ↓ (완만)
+const zEvery  = d=>Math.max(0.55,1.15-d*0.066);// 스폰 간격 ↓ (살짝 더 많이)
 const startLv = d=>1+Math.floor((d-1)/2);      // 단 높을수록 총 Lv 높게 시작 (1~3단:1, 4~6단:2, 7~9단:3)
 const gateSpeed=d=>150+d*9;
 
 /* 총 레벨 효과 */
 const fireEvery = l=>Math.max(0.11,0.46-l*0.05);
 const shots     = l=>l>=7?3:(l>=4?2:1);
-const dmg       = l=>l;                        // Lv1:1 Lv2:2 Lv3:3 ...
+const dmg       = l=>1+Math.floor(l*0.75);     // Lv1:1 Lv2:2 Lv3:3 Lv4:4 Lv5:4 ...
 
 const OKG=["정답! 🔫Lv↑","좋았어! 총 강화 ⚡","슉! 업그레이드","명중 감각 ✨"];
 const NOG=["앗 Lv↓","괜찮아 다시!","다음엔 맞아 💪"];
@@ -250,7 +250,7 @@ function resolveGate(){
   const ok=side===gate.correctSide;
   if(ok){ gunLevel=Math.min(MAXLVL,gunLevel+1); maxGun=Math.max(maxGun,gunLevel);
     addFloat(`${curDan}×${gate.mul}=${gate.ans} ✓`,'#8affd6'); addFloat(pick(OKG),'#8affd6',26); blip(880,.12); }
-  else{ gunLevel=Math.max(startLv(curDan),gunLevel-1); wrongGates++;
+  else{ gunLevel=Math.max(Math.max(1,startLv(curDan)-1),gunLevel-1); // 틀리면 시작Lv보다 한 칸 아래까지 떨어짐 wrongGates++;
     addFloat(`정답은 ${gate.ans}!`,'#ff9f9f'); addFloat(pick(NOG),'#ff9f9f',26); blip(180,.2); flash={c:'255,80,80',a:.5}; }
   qIndex++; gateCoolT=1.7;
   if(qIndex>=TOTAL_GATES){ pendingClear=true; }
@@ -302,7 +302,7 @@ function update(dt){
     for(const z of zombies){
       if(z.dead) continue;
       // 스윕 판정: 이번 프레임에 총알이 지나간 구간 전체로 검사 (프레임 끊겨도 안 뚫림) + 판정 폭 넓힘
-      const hw=z.size*0.65+b.r, hh=z.size*0.6, top=b.y, bot=(b.py!=null?b.py:b.y)+sp*1.35*dt;
+      const hw=z.size*0.58+b.r, hh=z.size*0.6, top=b.y, bot=(b.py!=null?b.py:b.y)+sp*1.35*dt;
       if(Math.abs(b.x-z.x)<hw && z.y+hh>=top && z.y-hh<=bot){
         z.hp-=b.dmg; b.y=-999;
         if(z.hp<=0){ z.dead=true; killCount++; addFloat('💥',pick(['#ffd150','#8affd6']),18,z.x,z.y); }
